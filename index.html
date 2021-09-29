@@ -13,15 +13,26 @@
       <h1>My Todo</h1>
       <!-- タブ Begin -->
       <div id="tab">
-        <div class="tab-list -active"><button>インボックス</button></div>
-        <div class="tab-list"><button>完了したタスク</button></div>
+        <div
+          class="tab-list"
+          v-bind:class="{ '-active': filter === 'inbox' }"
+        >
+            <button v-on:click="setFilter('inbox')">インボックス</button>
+        </div>
+        <div
+          class="tab-list"
+          v-bind:class="{ '-active': filter === 'completed' }"
+        >
+          <button v-on:click="setFilter('completed')">完了したタスク</button>
+        </div>
       </div>
       <!-- タブ End -->
       <!-- Todo入力フォーム Begin -->
-      <form id="input-form">
+      <form id="input-form" v-on:submit.prevent="handleSubmit">
         <div class="input-text">
           <label for="input-text">Todo</label>
           <input
+          v-model="text"
             type="text"
             id="input-text"
             name="todo-text"
@@ -29,17 +40,27 @@
           />
         </div>
         <div class="submit">
-          <button type="submit">登録</button>
+          <button type="submit" v-bind:disabled="disabled">登録</button>
         </div>
       </form>
       <!-- Todo入力フォーム End -->
       <!-- Todoリスト Begin -->
       <table id="todo-table">
         <tbody id="todo-main">
-          <tr>
-            <td class="cell-done"><label><input type="checkbox" /></label></td>
-            <td class="cell-text">みかんを買う</td>
-            <td class="cell-created-at">2019.3.1</td>
+          <tr v-for="todo in filteredTodos" v-bind:key="todo.id">
+            <td class="cell-done">
+              <label v-bind:class="{ '-active': todo.done }">
+                <input v-model="todo.done" type="checkbox" />
+              </label>
+            </td>
+            <td class="cell-text" v-if="todo.isEditing">
+              <input v-model="todo.text" />
+              <button v-on:click="saveTodo(todo.id)">保存</button>
+            </td>
+            <td class="cell-text" v-else v-on:click="editTodo(todo.id)">
+              {{ todo.text }}
+            </td>
+            <td class="cell-created-at">{{ formatDate(todo.createdAt) }}</td>
           </tr>
         </tbody>
       </table>
